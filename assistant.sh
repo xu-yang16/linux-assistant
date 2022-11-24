@@ -1,5 +1,5 @@
 #!/bin/bash
-
+sudo apt install -y xterm zenity curl
 Codename=$(lsb_release -sc)
 echo "检测到您的Ubuntu系统版本为：$Codename"
 username=$(whoami)
@@ -7,7 +7,7 @@ username=$(whoami)
 resize -s 45 90
 SELECT=$(whiptail --title "Ubuntu助手" --checklist \
 "选择要安装的软件或电脑配置（可多选，空格键选择，Tab键跳转)" 45 90 37 \
-"换源&Clean" "删除不需要的软件" ON \
+"换源&Clean" "删除不需要的软件" OFF \
 "键盘配置" "对调Esc和Caps" OFF \
 "Git" "版本管理软件" OFF \
 "Fish" "更智能的终端" OFF \
@@ -25,8 +25,6 @@ SELECT=$(whiptail --title "Ubuntu助手" --checklist \
 "Julia" "安装Julia" OFF \
 "kazam" "录屏软件" OFF \
 "Vim配置" "Vim自定义配置" OFF \
-"~~~~~~~~~~~~~~~~~~~~~~~~~~" "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" OFF \
-"conda,pip设置国内源" "     可显著提供conda/pip install 速度" OFF \
 3>&1 1>&2 2>&3
 )
 
@@ -87,8 +85,8 @@ echo_out() {
 }
 
 function success {
-	# if you want to use colored font display, must add -e parameter.
-	echo -e "${BGreen}安装成功！${Color_Off}"
+    # if you want to use colored font display, must add -e parameter.
+    echo -e "${BGreen}安装成功！${Color_Off}"
 }
 
 function keep {
@@ -144,15 +142,15 @@ function keyboard {
     config_success
 }
 
-function git {
+function Git {
     echo -e "${BGreen}将要安装git${Color_Off}" && sleep 1s
     sudo apt -y install git
-    git config --user.email "yangx21@mails.tsinghua.edu.cn"
-    git config --user.name "yx"
-
+    git config --global user.email "yangx21@mails.tsinghua.edu.cn"
+    git config --global user.name "yx"
+    success
 }
 
-function fish {
+function Fish {
     echo -e "${BGreen}将要安装fish${Color_Off}" && sleep 1s
     sudo apt -y install fish
     # 设置默认shell
@@ -160,11 +158,12 @@ function fish {
     curl -L https://get.oh-my.fish | fish
     omf install clearance
     omf install https://github.com/xu-yang16/colcon-abbr.fish
+    config_success
 }
 
 function sogou {
     echo -e "${BGreen}将要安装搜狗输入法${Color_Off}" && sleep 1s
-    sudo apt install -y fxitx
+    sudo apt install -y fcitx
     # 设置fcitx开机自启动
     sudo cp /usr/share/applications/fcitx.desktop /etc/xdg/autostart/
     sudo apt purge -y ibus
@@ -176,21 +175,24 @@ function sogou {
 
 function vscode {
     echo -e "${BGreen}将要安装VSCode${Color_Off}" && sleep 1s
-    cd ~
-	wget https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64 
-    sudo dpkg -i code_*.deb
-    rm code_*.deb
+    cd
+    wget -O code.deb https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64 
+    sudo dpkg -i code.deb
+    rm code.deb
     success
 }
 
 function proxy {
     echo -e "${BGreen}将要配置clash_for_windows${Color_Off}" && sleep 1s
     cd
-    mkdir ~/softwares/clash
+    mkdir -p ~/softwares/clash
     wget -O clash.tar.gz https://cloud.tsinghua.edu.cn/f/6cf786da854440faba41/?dl=1
-    tar -zxvf clash.tar.gz -C ~/software/clash --strip-components 1
+    tar -zxvf clash.tar.gz -C ~/softwares/clash --strip-components 1
     # 设置开机自启动
+    mkdir -p ~/.config/autostart
     echo -e "[Desktop Entry]\\nName=clash\\nExec=/home/$username/softwares/clash/cfw\\nType=Application" > ~/.config/autostart/clash.desktop
+    rm ~/clash.tar.gz
+    #TODO: automatic network setting
     echo_out "【clash_for_windows设置】输入订阅链接"
     config_success
 }
@@ -204,8 +206,8 @@ function beautify {
 
 function chrome {
     echo -e "${BYellow}将要安装Google Chrome${Color_Off}" && sleep 1s
-    cd ~
-	wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    cd
+    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
     sudo apt install ./google-chrome-stable_current_amd64.deb
     rm google-chrome*.deb
     success
@@ -314,6 +316,7 @@ function julia {
     echo "export JULIA_DEPOT_PATH=~/softwares/julia_package" >> ~/.bashrc
     echo "set -x fish_user_paths ~/softwares/julia/bin $fish_user_paths"
     echo "set -x JULIA_DEPOT_PATH ~/softwares/julia_package" 
+    rm ~/julia.tar.gz
     success
 }
 
@@ -326,8 +329,8 @@ function kazam {
 
 function vim {
     echo -e "${BGreen}将要配置vim${Color_Off}" && sleep 1s
-    cd ~
-	git clone --depth=1 https://github.com/amix/vimrc.git ~/.vim_runtime
+    cd
+    git clone --depth=1 https://github.com/amix/vimrc.git ~/.vim_runtime
     sh ~/.vim_runtime/install_awesome_vimrc.sh
     config_success
 }
@@ -339,8 +342,8 @@ if [ $existstatus = 0 ]; then
    # echo $SELECT | grep "7" && echo "test success"
     echo $SELECT | grep "换源&Clean" && clean
     echo $SELECT | grep "键盘配置" && keyboard
-    echo $SELECT | grep "Git" && git
-    echo $SELECT | grep "Fish" && fish
+    echo $SELECT | grep "Git" && Git
+    echo $SELECT | grep "Fish" && Fish
     echo $SELECT | grep "搜狗拼音输入法" && sogou
     echo $SELECT | grep "VSCode" && vscode
     echo $SELECT | grep "代理软件" && proxy
