@@ -6,15 +6,15 @@ username=$(whoami)
 
 resize -s 45 90
 SELECT=$(whiptail --title "Ubuntu助手" --checklist \
-"选择要安装的软件或电脑配置（可多选，空格键选择，Tab键跳转)" 45 90 37 \
-"换源&Clean" "删除不需要的软件" OFF \
-"键盘配置" "对调Esc和Caps" OFF \
+"选择要安装的软件或电脑配置（可多选，空格键选择，Tab键跳转)" 45 90 30 \
+"换源&Clean" "  删除不需要的软件" OFF \
+"键盘配置" "    对调Esc和Caps" OFF \
 "Git" "版本管理软件" OFF \
 "Fish" "更智能的终端" OFF \
 "搜狗拼音输入法" "       Linux版搜狗拼音输入法" OFF \
 "VSCode" "代码编辑器，功能强大、易用" OFF \
-"代理软件" "Clash for Windows" OFF \
-"Ubuntu美化" "Ubuntu美化" OFF \
+"代理软件" "    Clash for Windows" OFF \
+"Ubuntu美化" "  Ubuntu美化" OFF \
 "Google Chrome" "谷歌浏览器" OFF \
 "Zotero" "文献管理软件" OFF \
 "ROS2" "安装ROS2" OFF \
@@ -24,7 +24,7 @@ SELECT=$(whiptail --title "Ubuntu助手" --checklist \
 "VirtualBox" "虚拟机软件" OFF \
 "Julia" "安装Julia" OFF \
 "kazam" "录屏软件" OFF \
-"Vim配置" "Vim自定义配置" OFF \
+"Vim配置" "  Vim自定义配置" OFF \
 3>&1 1>&2 2>&3
 )
 
@@ -115,9 +115,11 @@ function config_clean {
     mkdir -p ~/.config/flameshot
     cp ./dotfile/flameshot.init ~/.config/flameshot/
     # lolcate配置
+    sudo cp ./dotfile/lolcate/lolcate /usr/bin/
+    lolcate --create
     sed -i "s/caslx/$username/g" ./dotfile/lolcate/default/config.toml
-    cp -r ./dotfile/lolcate ~/.config
-    lolcate init
+    cp -rf ./dotfile/lolcate ~/.config
+    
     # pip换清华源
     pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
     config_success
