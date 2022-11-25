@@ -89,10 +89,6 @@ function success {
     echo -e "${BGreen}安装成功！${Color_Off}"
 }
 
-function keep {
-	sleep 1s
-}
-
 function config_success {
 	# if you want to use colored font display, must add -e parameter.
 	echo -e "${BGreen}配置成功！${Color_Off}"
@@ -104,7 +100,7 @@ selects() {
 
 ###############安装##############
 
-function clean {
+function config_clean {
     echo -e "${BGreen}将要换清华源${Color_Off}" && sleep 1s
     sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
     sudo sed -i "s@http://.*archive.ubuntu.com@https://mirrors.tuna.tsinghua.edu.cn@g" /etc/apt/sources.list
@@ -112,22 +108,27 @@ function clean {
     sudo apt update
     echo -e "${BGreen}将要卸载libreoffice和thunderbird${Color_Off}" && sleep 1s
     sudo apt purge libreoffice* thunderbird*
-    sudo apt install -y vim gedit net-tools neovim cmake g++ flameshot neofetch python3-pip
+    sudo apt install -y vim gedit net-tools neovim cmake g++ flameshot neofetch python3-pip lolcate
+    # 更换文件夹名称
+    cp ./dotfile/user-dirs.dirs ~/.config/
+    # 截图配置
+    mkdir -p ~/.config/flameshot
+    cp ./dotfile/flameshot.init ~/.config/flameshot/
+    # lolcate配置
+    sed -i "s/caslx/$username/g" ./dotfile/lolcate/default/config.toml
+    cp -r ./dotfile/lolcate ~/.config
+    lolcate init
     # pip换清华源
     pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
     config_success
 }
 
-function keyboard {
+function config_keyboard {
     echo -e "${BGreen}将要配置键盘${Color_Off}" && sleep 1s
     # esc与cap互换
     sudo cp /usr/share/X11/xkb/symbols/pc /usr/share/X11/xkb/symbols/pc.bak
     sudo cp ./dotfile/pc /usr/share/X11/xkb/symbols/pc
     # 键盘快捷键
-    gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-left "['<Primary>Left']"
-    gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-right "['<Primary>Right']"
-    gsettings set org.gnome.desktop.wm.keybindings move-to-workspace-left "['<Primary><Shift>Left']"
-    gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-right "['<Primary><Shift>Right']"
     gsettings set org.gnome.desktop.wm.keybindings minimize "['<Super>comma']"
     gsettings set org.gnome.desktop.wm.keybindings close "['<Super>q', '<Alt>F4']"
     gsettings set org.gnome.settings-daemon.plugins.media-keys terminal "['<Super>t']"
@@ -142,15 +143,17 @@ function keyboard {
     config_success
 }
 
-function Git {
+function config_git {
     echo -e "${BGreen}将要安装git${Color_Off}" && sleep 1s
     sudo apt -y install git
     git config --global user.email "yangx21@mails.tsinghua.edu.cn"
     git config --global user.name "yx"
+    ssh-keygen -f ~/.ssh/gitlab-rsa -N ""
+    ssh-keygen -f ~/.ssh/github-rsa -N ""
     success
 }
 
-function Fish {
+function config_fish {
     echo -e "${BGreen}将要安装fish${Color_Off}" && sleep 1s
     sudo apt -y install fish
     # 设置默认shell
@@ -161,19 +164,26 @@ function Fish {
     config_success
 }
 
-function sogou {
+function config_sogou {
     echo -e "${BGreen}将要安装搜狗输入法${Color_Off}" && sleep 1s
     sudo apt install -y fcitx
     # 设置fcitx开机自启动
     sudo cp /usr/share/applications/fcitx.desktop /etc/xdg/autostart/
     sudo apt purge -y ibus
     sudo apt install -y libqt5qml5 libqt5quick5 libqt5quickwidgets5 qml-module-qtquick2 libgsettings-qt1
-
+    # 安装sogou
+    cd 
+    wget -O sogoupinyin.deb https://cloud.tsinghua.edu.cn/f/acc1fd55cefc49cb9f08/?dl=1
+    sudo dpkg -i sogoupinyin.deb
+    rm sogoupinyin.deb
+    # sogou配置
+    mkdir -p ~/.config/sogoupinyin
+    cp ./dotfile/sogou_env.init ~/.config/sogoupinyin/env.ini
     touch_check && echo_out "【搜狗拼音输入法】" && echo_out "请打开地区和语言设置->管理已安装语言->系统输入法框架，更改为fcitx，然后重启。重启后在输入法中添加搜狗，具体操作请参考：https://pinyin.sogou.com/linux/guide。只参考系统设置部分就可以，安装部分已经完成。"
     config_success
 }
 
-function vscode {
+function config_vscode {
     echo -e "${BGreen}将要安装VSCode${Color_Off}" && sleep 1s
     cd
     wget -O code.deb https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64 
@@ -182,29 +192,72 @@ function vscode {
     success
 }
 
-function proxy {
-    echo -e "${BGreen}将要配置clash_for_windows${Color_Off}" && sleep 1s
+function config_proxy {
+    echo -e "${UBlue}将要配置clash_for_windows${Color_Off}" && sleep 1s
     cd
     mkdir -p ~/softwares/clash
     wget -O clash.tar.gz https://cloud.tsinghua.edu.cn/f/6cf786da854440faba41/?dl=1
     tar -zxvf clash.tar.gz -C ~/softwares/clash --strip-components 1
     # 设置开机自启动
     mkdir -p ~/.config/autostart
-    echo -e "[Desktop Entry]\\nName=clash\\nExec=/home/$username/softwares/clash/cfw\\nType=Application" > ~/.config/autostart/clash.desktop
+    echo -e "[Desktop Entry]\\nName=clash\\nExec=/home/$username/softwares/clash/cfw\\nType=Application\\nTerminal=false\\nHidden=false" > ~/.config/autostart/clash.desktop
     rm ~/clash.tar.gz
-    #TODO: automatic network setting
-    echo_out "【clash_for_windows设置】输入订阅链接"
+    # 读取配置文件，订阅
+    cd
+    wget -O 加密.zip https://cloud.tsinghua.edu.cn/f/7629099abd364f6492c8/?dl=1
+    unzip -o 加密.zip   # passwd is needed
+    mkdir -p ~/.config/clash/profiles
+    cp 加密/config.yaml 加密/cfw-settings.yml ~/.config/clash/
+    cp 加密/list.yaml 加密/1669302728798.yml ~/.config/clash/profiles/
+    rm 加密.zip && rm -rf ~/加密/
+    # automatic network setting
+    gsettings set org.gnome.system.proxy mode 'manual'
+    gsettings set org.gnome.system.proxy.http host '127.0.0.1'
+    gsettings set org.gnome.system.proxy.http port 7890
+    gsettings set org.gnome.system.proxy.https host '127.0.0.1'
+    gsettings set org.gnome.system.proxy.https port 7890
+    gsettings set org.gnome.system.proxy.socks host '127.0.0.1'
+    gsettings set org.gnome.system.proxy.socks port 7891
+    echo_out "【clash_for_windows设置】更新订阅链接"
     config_success
 }
 
-#############################################################################
-function beautify {
+#################################################################################################################
+
+function config_beautify {
     echo -e "${BGreen}将要进行Ubuntu美化${Color_Off}" && sleep 1s
     sudo apt -y install gnome-tweaks plank
+    # plank开机自启动
+    echo -e "[Desktop Entry]\\nName=plank\\nComment=plank\\nExec=plank\\nType=Application\\nTerminal=false\\nHidden=false" > ~/.config/autostart/plank.desktop
+    # 主题配置
+    mv ./dotfile/themes ~/.themes
+    cd 
+    wget -O backgrounds.zip https://cloud.tsinghua.edu.cn/f/19513c92c98147589e25/?dl=1
+    wget -O gnome-shell.zip https://cloud.tsinghua.edu.cn/f/b37b794c5b624a8b8509/?dl=1
+    unzip -o backgrounds.zip
+    unzip -o gnome-shell.zip
+    mv ~/backgrounds ~/.local/share/
+    mv ~/gnome-shell ~/.local/share/
+    rm backgrounds.zip gnome-shell.zip
+    # workspace 快捷键设置
+    gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-left "['<Primary>Left']"
+    gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-right "['<Primary>Right']"
+    gsettings set org.gnome.desktop.wm.keybindings move-to-workspace-left "['<Primary><Shift>Left']"
+    gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-right "['<Primary><Shift>Right']"
+    # gnome设置
+    gsettings set org.gnome.desktop.interface clock-show-seconds 'false'
+    gsettings set org.gnome.desktop.interface clock-show-weekday 'true'
+    gsettings set org.gnome.desktop.interface color-scheme 'prefer-light'
+    gsettings set org.gnome.desktop.interface cursor-theme 'Yaru'
+    gsettings set org.gnome.desktop.interface gtk-theme 'Yaru'
+    gsettings set org.gnome.desktop.interface icon-theme 'Yaru'
+    gsettings set org.gnome.desktop.interface enable-hot-corners 'true'
+    gsettings set org.gnome.desktop.interface font-hinting 'slight'
+    
     config_success
 }
 
-function chrome {
+function config_chrome {
     echo -e "${BYellow}将要安装Google Chrome${Color_Off}" && sleep 1s
     cd
     wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
@@ -213,7 +266,7 @@ function chrome {
     success
 }
 
-function zotero {
+function config_zotero {
     echo -e "${BGreen}将要安装zotero${Color_Off}" && sleep 1s
     cd 
     mkdir -p ~/software/zotero && cd ~/software
@@ -229,7 +282,7 @@ function zotero {
     success
 }
 
-function ROS2 {
+function config_ROS2 {
     echo -e "${BGreen}将要安装ROS2${Color_Off}"
     ROS_DISTRO=humble
     if test "$Codename" = "foxy"; then
@@ -258,16 +311,17 @@ function ROS2 {
     config_success
 }
 
-function miniconda {
-    echo -e "${BGreen}将要安装miniconda${Color_Off}" && sleep 1s
-    cd ~
-    wget https://mirror.tuna.tsinghua.edu.cn/anaconda/archive/Anaconda3-2022.10-Linux-x86_64.sh
-    chmod +x Anaconda3*.sh
-    sh Anaconda3*.sh
-    rm Anaconda3*.sh
+function config_miniconda {
+    echo -e "${UBlue}将要安装miniconda${Color_Off}" && sleep 1s
+    cd
+    wget -O miniconda.sh https://mirror.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-py38_4.12.0-Linux-x86_64.sh
+    chmod +x miniconda.sh
+    ./miniconda.sh
+    rm miniconda.sh
     # 配置环境变量
     conda init bash
     conda init fish
+    conda config --set auto_activate_base false
     # 换源
     conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
     conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
@@ -275,7 +329,7 @@ function miniconda {
     success
 }
 
-function nvidia {
+function config_nvidia {
     echo -e "${BGreen}将要安装NVIDIA显卡驱动${Color_Off}"
     sudo add-apt-repository ppa:graphics-drivers/ppa
     sudo apt update
@@ -289,22 +343,24 @@ function nvidia {
     success
 }
 
-function sysmonitor {
-    echo -e "${BGreen}将要安装sysmonitor${Color_Off}"
+function config_sysmonitor {
+    echo -e "${BGreen}将要安装sysmonitor, stacer, backintime...${Color_Off}"
     # 安装sysmonitor
     sudo add-apt-repository ppa:fossfreedom/indicator-sysmonitor
     sudo apt update
     sudo apt -y install indicator-sysmonitor stacer backintime-qt4
+    # stacer开机自启动
+    echo -e"[Desktop Entry]\\nName=Stacer\\nComment=Linux System Optimizer and Monitoring\\nExec=env QT_SCALE_FACTOR=0.75 QT_AUTO_SCREEN_SCALE_FACTOR=1 stacer --hide\\nType=Application\\nTerminal=false\\nHidden=false" > ~/.config/autostart/stacer.desktop
     success
 }
 
-function virtualbox {
+function config_virtualbox {
     echo -e "${BGreen}将要安装virtualbox${Color_Off}" && sleep 1s
     sudo apt install -y virtualbox
     success
 }
 
-function julia {
+function config_julia {
     echo -e "${BGreen}将要安装julia${Color_Off}" && sleep 1s
     cd
     wget -O julia.tar.gz https://julialang-s3.julialang.org/bin/linux/x64/1.8/julia-1.8.3-linux-x86_64.tar.gz
@@ -320,14 +376,14 @@ function julia {
     success
 }
 
-function kazam {
+function config_kazam {
     echo -e "${BGreen}将要安装kazam${Color_Off}" && sleep 1s
     sudo apt -y install kazam
     sudo mv ../kazam/*.py /usr/lib/python3/dist-packages/kazam/backend
     success
 }
 
-function vim {
+function config_vim {
     echo -e "${BGreen}将要配置vim${Color_Off}" && sleep 1s
     cd
     git clone --depth=1 https://github.com/amix/vimrc.git ~/.vim_runtime
@@ -340,25 +396,25 @@ existstatus=$?
 
 if [ $existstatus = 0 ]; then
    # echo $SELECT | grep "7" && echo "test success"
-    echo $SELECT | grep "换源&Clean" && clean
-    echo $SELECT | grep "键盘配置" && keyboard
-    echo $SELECT | grep "Git" && Git
-    echo $SELECT | grep "Fish" && Fish
-    echo $SELECT | grep "搜狗拼音输入法" && sogou
-    echo $SELECT | grep "VSCode" && vscode
-    echo $SELECT | grep "代理软件" && proxy
+    echo $SELECT | grep "换源&Clean" && config_clean
+    echo $SELECT | grep "键盘配置" && config_keyboard
+    echo $SELECT | grep "Git" && config_git
+    echo $SELECT | grep "Fish" && config_fish
+    echo $SELECT | grep "搜狗拼音输入法" && config_sogou
+    echo $SELECT | grep "VSCode" && config_vscode
+    echo $SELECT | grep "代理软件" && config_proxy
 
-    echo $SELECT | grep "Ubuntu美化" && beautify
-    echo $SELECT | grep "Google Chrome" && chrome
-    echo $SELECT | grep "Zotero" && zotero
-    echo $SELECT | grep "ROS2" && ROS2
-    echo $SELECT | grep "Miniconda3" && miniconda
-    echo $SELECT | grep "Nvidia显卡驱动" && nvidia
-    echo $SELECT | grep "sysmonitor&stacer&backintime" && sysmonitor
-    echo $SELECT | grep "VirtualBox" && virtualbox
-    echo $SELECT | grep "Julia" && julia
-    echo $SELECT | grep "kazam" && kazam
-    echo $SELECT | grep "Vim配置" && vim
+    echo $SELECT | grep "Ubuntu美化" && config_beautify
+    echo $SELECT | grep "Google Chrome" && config_chrome
+    echo $SELECT | grep "Zotero" && config_zotero
+    echo $SELECT | grep "ROS2" && config_ROS2
+    echo $SELECT | grep "Miniconda3" && config_miniconda
+    echo $SELECT | grep "Nvidia显卡驱动" && config_nvidia
+    echo $SELECT | grep "sysmonitor&stacer&backintime" && config_sysmonitor
+    echo $SELECT | grep "VirtualBox" && config_virtualbox
+    echo $SELECT | grep "Julia" && config_julia
+    echo $SELECT | grep "kazam" && config_kazam
+    echo $SELECT | grep "Vim配置" && config_vim
     
     if [ $Flag_Doc -eq 1 ]
     then 
