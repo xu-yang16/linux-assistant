@@ -309,7 +309,8 @@ function config_ROS2 {
     # 写入fish config环境变量
     echo "#ROS2 $ROS_DISTRO" >> ~/.config/fish/config.fish
     echo source /opt/ros/$ROS_DISTRO/setup.bash >> ~/.config/fish/config.fish
-
+    # bass in fish
+    omf install bass
     config_success
 }
 
