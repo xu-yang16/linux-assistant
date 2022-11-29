@@ -108,13 +108,14 @@ function config_clean {
     sudo apt update
     echo -e "${BGreen}将要卸载libreoffice和thunderbird${Color_Off}" && sleep 1s
     sudo apt purge libreoffice* thunderbird*
-    sudo apt install -y vim gedit net-tools neovim cmake g++ flameshot neofetch python3-pip lolcate
+    sudo apt install -y vim gedit net-tools neovim cmake g++ flameshot neofetch python3-pip
     # 更换文件夹名称
     cp ./dotfile/user-dirs.dirs ~/.config/
     # 截图配置
     mkdir -p ~/.config/flameshot
     cp ./dotfile/flameshot.init ~/.config/flameshot/
     # lolcate配置
+    wget -O lolcate.tar.gz https://github.com/ngirard/lolcate-rs/releases/download/v0.10.0/lolcate--x86_64-unknown-linux-musl.tar.gz
     sudo cp ./dotfile/lolcate/lolcate /usr/bin/
     lolcate --create
     sed -i "s/caslx/$username/g" ./dotfile/lolcate/default/config.toml
@@ -271,14 +272,14 @@ function config_chrome {
 function config_zotero {
     echo -e "${BGreen}将要安装zotero${Color_Off}" && sleep 1s
     cd 
-    mkdir -p ~/software/zotero && cd ~/software
+    mkdir -p ~/softwares/zotero && cd ~/softwares
     wget -O zotero.tar.gz https://www.zotero.org/download/client/dl?channel=release&platform=linux-x86_64&version=6.0.18
     wget https://github.com/jlegewie/zotfile/releases/download/v5.1.2/zotfile-5.1.2-fx.xpi
     tar -jxvf zotero.tar.bz2 -C ~/softwares/zotero --strip-components 1
     # update the .desktop file for that location
-    sh ~/software/zotero/set_launcher_icon
+    bash ~/softwares/zotero/set_launcher_icon
     # symlink
-    ln -s ~/software/zotero/zotero.desktop ~/.local/share/applications/zotero.desktop
+    ln -s ~/softwares/zotero/zotero.desktop ~/.local/share/applications/zotero.desktop
     echo_out "【zotero设置】"
     echo_out "zotero首选项-同步-设置, 首先登录，勾选自动同步、同步全文内容、同步文献库中的附件，使用WebDAV；url为https://app.koofr.net/dav/OneDrive for Business/zotero，用户名2306669517@qq.com；进入zotero首选项-高级-文件和文件夹，根目录为/home/$username/SeaDrive/我的资料库/zotero/papers，数据存储位置为自定义：/home/$username/softwares/zotero_data"
     success
@@ -373,8 +374,8 @@ function config_julia {
     echo "# install julia" >> ~/.bashrc
     echo "export PATH=$PATH:~/softwares/julia/bin" >> ~/.bashrc
     echo "export JULIA_DEPOT_PATH=~/softwares/julia_package" >> ~/.bashrc
-    echo "set -x fish_user_paths ~/softwares/julia/bin $fish_user_paths"
-    echo "set -x JULIA_DEPOT_PATH ~/softwares/julia_package" 
+    echo "set -x fish_user_paths ~/softwares/julia/bin $fish_user_paths" >> ~/.bashrc
+    echo "set -x JULIA_DEPOT_PATH ~/softwares/julia_package" >> ~/.bashrc
     rm ~/julia.tar.gz
     success
 }
