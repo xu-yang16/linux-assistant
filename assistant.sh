@@ -113,10 +113,9 @@ function config_clean {
     cp ./dotfile/user-dirs.dirs ~/.config/
     # 截图配置
     mkdir -p ~/.config/flameshot
-    cp ./dotfile/flameshot.init ~/.config/flameshot/
+    cp ./dotfile/flameshot.ini ~/.config/flameshot/
     # lolcate配置
-    wget -O lolcate.tar.gz https://github.com/ngirard/lolcate-rs/releases/download/v0.10.0/lolcate--x86_64-unknown-linux-musl.tar.gz
-    sudo cp ./dotfile/lolcate/lolcate /usr/bin/
+    sudo mv ./dotfile/lolcate/lolcate /usr/bin/
     lolcate --create
     sed -i "s/caslx/$username/g" ./dotfile/lolcate/default/config.toml
     cp -rf ./dotfile/lolcate ~/.config
@@ -181,7 +180,7 @@ function config_sogou {
     rm sogoupinyin.deb
     # sogou配置
     mkdir -p ~/.config/sogoupinyin
-    cp ./dotfile/sogou_env.init ~/.config/sogoupinyin/env.ini
+    cp ./dotfile/sogou_env.ini ~/.config/sogoupinyin/env.ini
     touch_check && echo_out "【搜狗拼音输入法】" && echo_out "请打开地区和语言设置->管理已安装语言->系统输入法框架，更改为fcitx，然后重启。重启后在输入法中添加搜狗，具体操作请参考：https://pinyin.sogou.com/linux/guide。只参考系统设置部分就可以，安装部分已经完成。"
     config_success
 }
@@ -383,7 +382,7 @@ function config_julia {
 function config_kazam {
     echo -e "${BGreen}将要安装kazam${Color_Off}" && sleep 1s
     sudo apt -y install kazam
-    sudo mv ../kazam/*.py /usr/lib/python3/dist-packages/kazam/backend
+    sudo cp ./kazam/*.py /usr/lib/python3/dist-packages/kazam/backend
     success
 }
 
