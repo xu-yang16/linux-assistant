@@ -155,6 +155,7 @@ function config_git {
     git config --global user.name "yx"
     ssh-keygen -f ~/.ssh/gitlab-rsa -N ""
     ssh-keygen -f ~/.ssh/github-rsa -N ""
+    copy ./dotfile/config ~/.ssh/
     success
 }
 
@@ -312,7 +313,7 @@ function config_sysmonitor {
     mkdir ~/softwares
     cp ./dotfile/displayIP.sh ~/softwares/
     chmod +x ~/softwares/displayIP.sh 
-    cp .dotfile/indicator-sysmonitor.json ~/
+    cp ./dotfile/indicator-sysmonitor.json ~/
     # stacer开机自启动
     echo -e "[Desktop Entry]\\nName=Stacer\\nComment=Linux System Optimizer and Monitoring\\nExec=env QT_SCALE_FACTOR=0.75 QT_AUTO_SCREEN_SCALE_FACTOR=1 stacer --hide\\nType=Application\\nTerminal=false\\nHidden=false" > ~/.config/autostart/stacer.desktop
     echo -e "${BGreen}添加/home/${username}/softwares/displayIP.sh到indicator-sysmonitor${Color_Off}"
