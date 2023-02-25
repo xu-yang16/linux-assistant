@@ -156,6 +156,8 @@ function config_git {
     ssh-keygen -f ~/.ssh/gitlab-rsa -N ""
     ssh-keygen -f ~/.ssh/github-rsa -N ""
     copy ./dotfile/config ~/.ssh/
+    # ssh -T git@github.com
+    # ssh -T git@git.tsinghua.edu.cn
     success
 }
 

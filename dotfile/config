@@ -1,5 +1,5 @@
 # GitLab.com
-Host gitlab.tsinghua.edu.cn
+Host git.tsinghua.edu.cn
   Preferredauthentications publickey
   IdentityFile ~/.ssh/gitlab_rsa
 
