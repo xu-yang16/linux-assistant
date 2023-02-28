@@ -138,10 +138,10 @@ function config_keyboard {
     gsettings set org.gnome.desktop.wm.keybindings close "['<Super>q', '<Alt>F4']"
     gsettings set org.gnome.settings-daemon.plugins.media-keys terminal "['<Super>t']"
     gsettings set org.gnome.settings-daemon.plugins.media-keys www "['<Super>b']"
-    gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']"
     # 截图
     sudo apt -y install flameshot
     # 火焰截图快捷键
+    gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']"
     gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding '<Primary><Shift>a'
     gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'flameshot gui'
     gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ name '火焰截图'
@@ -326,7 +326,7 @@ function config_sysmonitor {
 
 function config_beautify {
     echo -e "${BGreen}将要进行Ubuntu美化${Color_Off}" && sleep 1s
-    sudo apt -y install gnome-tweaks plank
+    sudo apt -y install gnome-tweaks plank dconf-editor chrome-gnome-shell
     # plank开机自启动
     echo -e "[Desktop Entry]\\nName=plank\\nComment=plank\\nExec=plank\\nType=Application\\nTerminal=false\\nHidden=false" > ~/.config/autostart/plank.desktop
     # 主题配置
@@ -340,11 +340,12 @@ function config_beautify {
     mv ~/gnome-shell/* ~/.local/share/
     rm backgrounds.zip gnome-shell.zip
     rm -rf gnome-shell
+    # 对于ubuntu20.04而言，默认的workspace是vertical的，要变成horizontal，需要安装gnome shell插件horizontal spaces
     # workspace 快捷键设置
     gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-left "['<Primary>Left']"
     gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-right "['<Primary>Right']"
     gsettings set org.gnome.desktop.wm.keybindings move-to-workspace-left "['<Primary><Shift>Left']"
-    gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-right "['<Primary><Shift>Right']"
+    gsettings set org.gnome.desktop.wm.keybindings move-to-workspace-right "['<Primary><Shift>Right']"
     # gnome设置
     gsettings set org.gnome.desktop.interface clock-show-seconds 'false'
     gsettings set org.gnome.desktop.interface clock-show-weekday 'true'
@@ -432,6 +433,7 @@ function config_ROS2 {
     # add the repository to the sources list
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
     sudo apt -y install ros-$ROS_DISTRO-desktop 
+    sudo apt -y install python3-colcon-common-extensions
     # 写入bashrc环境变量
     echo "#ROS2 $ROS_DISTRO" >> ~/.bashrc
     echo source /opt/ros/$ROS_DISTRO/setup.bash >> ~/.bashrc
