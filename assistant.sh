@@ -163,12 +163,25 @@ function config_git {
 
 function config_fish {
     echo -e "${BGreen}将要安装fish${Color_Off}" && sleep 1s
+
+    # apt install (old version)
     sudo apt -y install fish
+    
+    # latest install
+    wget https://launchpad.net/~fish-shell/+archive/ubuntu/release-4/+files/fish_4.0.1-1~jammy_amd64.deb
+    sudo dpkg -i fish_4.0.1-1~jammy_amd64.deb
+
     # 设置默认shell
     chsh -s /usr/bin/fish
     curl -L https://get.oh-my.fish | fish
     omf install clearance
     omf install https://github.com/xu-yang16/colcon-abbr.fish
+
+    # install fisher
+    curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher
+    omf install bass fzf
+    sudo apt install fzf
+    fisher install sven-hoek/ros2.fish@77df167
     config_success
 }
 
