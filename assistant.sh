@@ -368,8 +368,21 @@ function config_beautify {
     gsettings set org.gnome.desktop.interface icon-theme 'Yaru'
     gsettings set org.gnome.desktop.interface enable-hot-corners 'true'
     gsettings set org.gnome.desktop.interface font-hinting 'slight'
-    # 
-    
+    # swam
+    sudo apt install -y xdotool
+    # 生成唯一标识符
+    UUID=$(uuidgen)
+
+    # left swam
+    NAME="left swam"
+    COMMAND="/home/$USER/scripts/swam.sh 0"
+    SHORTCUT="['<Control><Super>Left']"
+
+    # right swam
+    NAME="right swam"
+    COMMAND="/home/$USER/scripts/swam.sh 1"
+    SHORTCUT="['<Control><Super>Right']"
+
     config_success
 }
 
